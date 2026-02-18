@@ -9,7 +9,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-
 *{margin:0;padding:0;box-sizing:border-box;}
 body{
 font-family:'Inter',sans-serif;
@@ -17,47 +16,8 @@ background:#0b0f18;
 color:#eaeefb;
 min-height:100vh;
 overflow-x:hidden;
-position:relative;
 }
 
-/* GRID ANIMADO */
-body::before{
-content:"";
-position:fixed;
-width:100%;
-height:100%;
-background-image:
-linear-gradient(rgba(0,217,245,0.07) 1px, transparent 1px),
-linear-gradient(90deg, rgba(0,217,245,0.07) 1px, transparent 1px);
-background-size:40px 40px;
-animation:gridMove 30s linear infinite;
-z-index:-2;
-}
-
-@keyframes gridMove{
-0%{background-position:0 0}
-100%{background-position:40px 40px}
-}
-
-/* SCANNER LINE */
-.scanline{
-position:fixed;
-top:-5px;
-left:0;
-width:100%;
-height:4px;
-background:linear-gradient(90deg,transparent,#00d9f5,transparent);
-animation:scan 6s linear infinite;
-z-index:-1;
-opacity:0.5;
-}
-
-@keyframes scan{
-0%{top:-5px}
-100%{top:100%}
-}
-
-/* HEADER */
 header{
 text-align:center;
 padding:60px 20px 20px;
@@ -72,19 +32,9 @@ background:linear-gradient(90deg,#00f5a0,#00d9f5);
 color:transparent;
 }
 
-.subtitle{
-opacity:0.5;
-margin-top:8px;
-font-size:14px;
-}
+.subtitle{opacity:0.5;margin-top:8px;font-size:14px;}
+.author{margin-top:6px;font-size:13px;opacity:0.4;}
 
-.author{
-margin-top:6px;
-font-size:13px;
-opacity:0.4;
-}
-
-/* CONTAINER */
 .container{
 max-width:900px;
 margin:auto;
@@ -94,10 +44,8 @@ background:rgba(255,255,255,0.04);
 border:1px solid rgba(0,217,245,0.15);
 backdrop-filter:blur(25px);
 box-shadow:0 0 50px rgba(0,0,0,0.6);
-transition:0.3s;
 }
 
-/* TEXTAREA */
 textarea{
 width:100%;
 height:170px;
@@ -117,7 +65,6 @@ box-shadow:0 0 20px rgba(0,217,245,0.6);
 background:rgba(255,255,255,0.08);
 }
 
-/* BUTTON */
 button{
 margin-top:25px;
 padding:15px 50px;
@@ -127,76 +74,34 @@ font-weight:700;
 background:linear-gradient(90deg,#00f5a0,#00d9f5);
 color:black;
 cursor:pointer;
-position:relative;
-overflow:hidden;
 transition:0.3s;
 }
 
-button::after{
-content:"";
-position:absolute;
-width:0;
-height:0;
-background:rgba(255,255,255,0.4);
-border-radius:50%;
-transform:translate(-50%,-50%);
-pointer-events:none;
-}
+button:hover{transform:scale(1.05);}
 
-button:active::after{
-width:300px;
-height:300px;
-transition:0s;
-}
-
-button:hover{
-transform:scale(1.05);
-}
-
-/* RESULT */
 .result{
 margin-top:40px;
 display:none;
-animation:fadeIn 0.7s ease;
+animation:fadeIn 0.6s ease;
 }
 
 @keyframes fadeIn{
-from{opacity:0;transform:translateY(15px)}
+from{opacity:0;transform:translateY(10px)}
 to{opacity:1;transform:translateY(0)}
 }
 
-/* CIRCLE INDICATOR */
 .circle{
-width:180px;
-height:180px;
+width:200px;
+height:200px;
 border-radius:50%;
-border:8px solid rgba(0,217,245,0.2);
+margin:20px auto;
 display:flex;
 align-items:center;
 justify-content:center;
-margin:20px auto;
-position:relative;
-}
-
-.circle::before{
-content:"";
-position:absolute;
-width:100%;
-height:100%;
-border-radius:50%;
-border:8px solid #00d9f5;
-clip-path:inset(0 0 50% 0);
-animation:rotate 3s linear infinite;
-}
-
-@keyframes rotate{
-from{transform:rotate(0deg)}
-to{transform:rotate(360deg)}
-}
-
-.risk-text{
-font-size:22px;
+font-size:28px;
 font-weight:700;
+background:conic-gradient(#00d9f5 0deg, rgba(255,255,255,0.08) 0deg);
+transition:1.5s ease;
 }
 
 .recommendation{
@@ -215,13 +120,10 @@ margin:80px 0 30px;
 opacity:0.4;
 font-size:13px;
 }
-
 </style>
 </head>
 
 <body>
-
-<div class="scanline"></div>
 
 <header>
 <h1>PROTOCOLO G.S.O.</h1>
@@ -234,9 +136,7 @@ font-size:13px;
 <button onclick="analisar()">INICIAR ANÁLISE</button>
 
 <div class="result" id="resultado">
-<div class="circle">
-<div class="risk-text" id="risco">0%</div>
-</div>
+<div class="circle" id="circle">0%</div>
 <canvas id="grafico"></canvas>
 <div class="recommendation" id="recomendacao"></div>
 </div>
@@ -248,45 +148,83 @@ Protocolo G.S.O. — Defesa Cognitiva Digital Global
 
 <script>
 
+let chartInstance=null;
+
 function analisar(){
-let texto=document.getElementById("texto").value.toLowerCase();
-if(texto.length<15){alert("Insira um texto maior.");return;}
+let texto=document.getElementById("texto").value;
+if(texto.length<20){alert("Insira um texto mais completo.");return;}
 
-let urgencia=(texto.match(/agora|urgente|imediato|hoje|última chance|rápido/g)||[]).length;
-let dinheiro=(texto.match(/pix|dinheiro|pagamento|taxa|transferência/g)||[]).length;
-let pressao=(texto.match(/se não|bloqueado|cancelado|problema sério/g)||[]).length;
-let emocional=(texto.match(/desesperado|socorro|ajuda|grave|perigo/g)||[]).length;
+let lower=texto.toLowerCase();
+let palavras=lower.split(/\s+/).filter(p=>p.length>2);
+let total=palavras.length;
 
-let riscoTotal=(urgencia*18)+(dinheiro*25)+(pressao*22)+(emocional*15);
-if(riscoTotal>100)riscoTotal=100;
+function densidade(regex){
+return ((lower.match(regex)||[]).length)/total;
+}
+
+let urgencia=densidade(/agora|urgente|imediato|hoje|última chance|rápido/g);
+let financeiro=densidade(/pix|dinheiro|pagamento|taxa|transferência|cartão/g);
+let ameaca=densidade(/bloqueado|cancelado|processo|problema|penalidade/g);
+let emocional=densidade(/desespero|socorro|ajuda|grave|perigo/g);
+let imperativo=densidade(/clique|acesse|envie|faça|responda|pague/g);
+
+let repeticao=(new Set(palavras).size/total);
+let exclamacoes=(texto.match(/!/g)||[]).length/5;
+let caixaAlta=(texto.match(/[A-Z]{4,}/g)||[]).length/3;
+
+let risco=
+(urgencia*120)+
+(financeiro*150)+
+(ameaca*130)+
+(emocional*100)+
+(imperativo*120)+
+((1-repeticao)*60)+
+(exclamacoes*20)+
+(caixaAlta*30);
+
+risco=Math.min(Math.round(risco),100);
 
 document.getElementById("resultado").style.display="block";
-document.getElementById("risco").innerHTML=riscoTotal+"%";
 
-new Chart(document.getElementById("grafico"),{
+let graus=risco*3.6;
+document.getElementById("circle").style.background=
+`conic-gradient(#00d9f5 ${graus}deg, rgba(255,255,255,0.08) ${graus}deg)`;
+document.getElementById("circle").innerHTML=risco+"%";
+
+if(chartInstance){chartInstance.destroy();}
+
+chartInstance=new Chart(document.getElementById("grafico"),{
 type:'radar',
 data:{
-labels:["Urgência","Financeiro","Pressão","Emocional"],
+labels:["Urgência","Financeiro","Ameaça","Emocional","Imperativo"],
 datasets:[{
-data:[urgencia*18,dinheiro*25,pressao*22,emocional*15],
+data:[
+Math.round(urgencia*100),
+Math.round(financeiro*100),
+Math.round(ameaca*100),
+Math.round(emocional*100),
+Math.round(imperativo*100)
+],
 borderColor:"#00d9f5",
 backgroundColor:"rgba(0,217,245,0.2)"
 }]
 }
 });
 
-let textoRec="Recomendação: ";
-if(riscoTotal>70){
-textoRec+="Alto risco. Não execute ações imediatas.";
-}else if(riscoTotal>40){
-textoRec+="Risco moderado. Analise cuidadosamente.";
-}else{
-textoRec+="Baixo risco estrutural identificado.";
+let textoRec="";
+
+if(risco>75){
+textoRec="ALTO RISCO estrutural identificado. Forte padrão de manipulação e pressão.";
+}
+else if(risco>45){
+textoRec="Risco moderado detectado. Avalie cuidadosamente antes de agir.";
+}
+else{
+textoRec="Baixo risco estrutural identificado. Texto aparentemente informativo.";
 }
 
 document.getElementById("recomendacao").innerHTML=textoRec;
 }
-
 </script>
 
 </body>
