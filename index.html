@@ -39,7 +39,7 @@ z-index:-2;
 100%{background-position:40px 40px}
 }
 
-/* SCAN LINE */
+/* SCAN */
 .scanline{
 position:fixed;
 top:-5px;
@@ -75,7 +75,7 @@ color:transparent;
 .author{margin-top:6px;font-size:13px;opacity:0.4;}
 
 .container{
-max-width:950px;
+max-width:900px;
 margin:auto;
 padding:40px;
 border-radius:20px;
@@ -101,7 +101,6 @@ transition:0.3s;
 
 textarea:focus{
 box-shadow:0 0 20px rgba(0,217,245,0.6);
-background:rgba(255,255,255,0.08);
 }
 
 button{
@@ -129,74 +128,40 @@ from{opacity:0;transform:translateY(15px);}
 to{opacity:1;}
 }
 
-/* SCORE AREA */
-
-.score-area{
-margin-top:20px;
-}
-
-.score-value{
-font-size:70px;
+.score{
+font-size:72px;
 font-weight:800;
+margin-bottom:5px;
 }
 
-.score-label{
-font-size:22px;
+.classificacao{
+font-size:24px;
 font-weight:600;
-margin-top:-5px;
+margin-bottom:35px;
 }
 
-.progress{
-margin-top:20px;
-width:100%;
-height:12px;
-background:rgba(255,255,255,0.1);
-border-radius:10px;
-overflow:hidden;
+.metric{
+margin-bottom:20px;
 }
 
-.progress-fill{
-height:100%;
-width:0%;
-background:linear-gradient(90deg,#00f5a0,#00d9f5);
-transition:1.2s ease;
-}
-
-/* CARDS */
-
-.cards{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:15px;
-margin-top:35px;
-}
-
-.card{
-background:rgba(255,255,255,0.05);
-padding:18px;
-border-radius:12px;
-border:1px solid rgba(255,255,255,0.1);
-}
-
-.card-title{
-font-size:13px;
+.metric-title{
+font-size:16px;
 opacity:0.6;
-margin-bottom:6px;
 }
 
-.card-value{
-font-size:22px;
+.metric-value{
+font-size:26px;
 font-weight:700;
 }
 
 .recommendation{
-margin-top:35px;
-padding:18px;
+margin-top:40px;
+padding:20px;
 border-radius:14px;
 background:rgba(0,217,245,0.08);
 border:1px solid rgba(0,217,245,0.3);
 font-size:14px;
-line-height:1.5;
+line-height:1.6;
 }
 
 footer{
@@ -226,40 +191,32 @@ font-size:13px;
 
 <div class="result" id="resultado">
 
-<div class="score-area">
-<div class="score-value" id="score">0%</div>
-<div class="score-label" id="classificacao">Classificação</div>
+<div class="score" id="score">0%</div>
+<div class="classificacao" id="classificacao">Classificação</div>
+
+<div class="metric">
+<div class="metric-title">Urgência</div>
+<div class="metric-value" id="urgenciaV">0%</div>
 </div>
 
-<div class="progress">
-<div class="progress-fill" id="barra"></div>
+<div class="metric">
+<div class="metric-title">Financeiro</div>
+<div class="metric-value" id="financeiroV">0%</div>
 </div>
 
-<div class="cards">
-
-<div class="card">
-<div class="card-title">Urgência</div>
-<div class="card-value" id="urgenciaV">0%</div>
+<div class="metric">
+<div class="metric-title">Ameaça</div>
+<div class="metric-value" id="ameacaV">0%</div>
 </div>
 
-<div class="card">
-<div class="card-title">Financeiro</div>
-<div class="card-value" id="financeiroV">0%</div>
+<div class="metric">
+<div class="metric-title">Imperativo</div>
+<div class="metric-value" id="imperativoV">0%</div>
 </div>
 
-<div class="card">
-<div class="card-title">Ameaça</div>
-<div class="card-value" id="ameacaV">0%</div>
+<div class="recommendation">
+Análise estrutural baseada em padrões linguísticos. Para detectar golpes narrativos sofisticados, recomenda-se integrar modelo semântico de IA.
 </div>
-
-<div class="card">
-<div class="card-title">Imperativo</div>
-<div class="card-value" id="imperativoV">0%</div>
-</div>
-
-</div>
-
-<div class="recommendation" id="recomendacao"></div>
 
 </div>
 </div>
@@ -287,13 +244,11 @@ let ameaca=densidade(/bloqueado|cancelado|problema/g)*100;
 let imperativo=densidade(/me faz|pode|envie|faça|responda/g)*100;
 
 let risco=(urgencia*1.5)+(financeiro*1.8)+(ameaca*1.4)+(imperativo*1.3);
-
 risco=Math.min(Math.round(risco),100);
 
 document.getElementById("resultado").style.display="block";
 
 document.getElementById("score").innerHTML=risco+"%";
-document.getElementById("barra").style.width=risco+"%";
 
 document.getElementById("urgenciaV").innerHTML=Math.round(urgencia)+"%";
 document.getElementById("financeiroV").innerHTML=Math.round(financeiro)+"%";
@@ -305,9 +260,6 @@ if(risco>70){classe="ALTO RISCO";}
 else if(risco>40){classe="RISCO MODERADO";}
 
 document.getElementById("classificacao").innerHTML=classe;
-
-document.getElementById("recomendacao").innerHTML=
-"Análise estrutural baseada em padrões linguísticos. Para detectar golpes narrativos sofisticados, recomenda-se integrar modelo semântico de IA.";
 
 }
 
