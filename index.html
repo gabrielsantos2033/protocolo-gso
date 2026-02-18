@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protocolo G.S.O.</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: #0f1115;
+    color: #e4e6eb;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    padding: 40px 20px 10px;
+    text-align: center;
+}
+
+h1 {
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.sub {
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
+textarea {
+    width: 90%;
+    max-width: 800px;
+    height: 160px;
+    background: #1a1d24;
+    border: 1px solid #2b2f39;
+    border-radius: 8px;
+    padding: 15px;
+    color: white;
+    font-size: 15px;
+    margin-top: 30px;
+}
+
+button {
+    margin-top: 20px;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 6px;
+    background: #00c896;
+    color: black;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.result {
+    margin-top: 40px;
+    width: 90%;
+    max-width: 800px;
+}
+
+footer {
+    margin-top: 80px;
+    padding: 20px;
+    opacity: 0.5;
+    font-size: 13px;
+    text-align: center;
+}
+canvas {
+    margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>PROTOCOLO G.S.O.</h1>
+<div class="sub">Sistema Internacional de Defesa Cognitiva</div>
+</header>
+
+<textarea id="texto" placeholder="Cole aqui o texto para análise..."></textarea>
+<button onclick="analisar()">Analisar Texto</button>
+
+<div class="result">
+<h3 id="risco"></h3>
+<canvas id="grafico"></canvas>
+</div>
+
+<footer>
+Protocolo G.S.O. — Idealizado e desenvolvido por Gabriel Santos Oficial
+</footer>
+
+<script>
+
+function analisar() {
+
+    let texto = document.getElementById("texto").value.toLowerCase();
+
+    if(texto.length < 10){
+        alert("Texto muito curto.");
+        return;
+    }
+
+    let urgencia = (texto.match(/agora|urgente|imediato|hoje|rápido/g) || []).length;
+    let dinheiro = (texto.match(/pix|dinheiro|pagamento|transferência|taxa/g) || []).length;
+    let pressao = (texto.match(/se não|última chance|bloqueado|cancelado/g) || []).length;
+    let emocional = (texto.match(/desesperado|socorro|ajuda|problema/g) || []).length;
+
+    let score = (urgencia*20) + (dinheiro*25) + (pressao*25) + (emocional*15);
+
+    if(score > 100) score = 100;
+
+    document.getElementById("risco").innerHTML = "Nível de Risco: " + score + "%";
+
+    new Chart(document.getElementById("grafico"), {
+        type: 'radar',
+        data: {
+            labels: ["Urgência", "Financeiro", "Pressão", "Emocional"],
+            datasets: [{
+                data: [urgencia*20, dinheiro*25, pressao*25, emocional*15]
+            }]
+        }
+    });
+}
+
+</script>
+
+</body>
+</html>
