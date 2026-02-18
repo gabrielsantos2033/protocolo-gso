@@ -1,4 +1,5 @@
-export default async function handler(req, res) {
+export default function handler(req, res) {
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método não permitido" });
   }
@@ -9,63 +10,29 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Texto não fornecido" });
   }
 
-  try {
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/facebook/bart-large-mnli?wait_for_model=true",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.HF_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          inputs: texto,
-          parameters: {
-            candidate_labels: [
-              "golpe financeiro",
-              "fraude familiar",
-              "engenharia social",
-              "pedido urgente suspeito",
-              "mensagem legítima"
-            ]
-          }
-        }),
-      }
-    );
+  const t = texto.toLowerCase();
 
-    const data = await response.json();
+  let score = 0;
 
-    // Se o modelo estiver carregando
-    if (data.error) {
-      return res.status(500).json({
-        error: "Modelo carregando ou token inválido",
-        detalhes: data.error
-      });
-    }
+  // Indicadores combinados
+  if (t.includes("pix") || t.includes("transferência")) score += 25;
+  if (t.includes("urgente") || t.includes("agora")) score += 20;
+  if (t.includes("número novo") || t.includes("troquei de chip")) score += 25;
+  if (t.includes("amanhã eu devolvo")) score += 20;
+  if (t.includes("me ajuda") && t.includes("pagar")) score += 20;
 
-    if (!data.scores || !data.labels) {
-      return res.status(500).json({
-        error: "Resposta inesperada da IA",
-        raw: data
-      });
-    }
+  // Contexto narrativo
+  if (t.includes("mãe") || t.includes("pai")) score += 10;
 
-    const resultados = data.labels.map((label, index) => ({
-      label,
-      score: Math.round(data.scores[index] * 100)
-    }));
+  if (score > 100) score = 100;
 
-    const risco = Math.max(...resultados.map(r => r.score));
+  let classificacao;
+  if (score >= 70) classificacao = "ALTO RISCO";
+  else if (score >= 40) classificacao = "MÉDIO RISCO";
+  else classificacao = "BAIXO RISCO";
 
-    return res.status(200).json({
-      risco,
-      resultados
-    });
-
-  } catch (error) {
-    return res.status(500).json({
-      error: "Falha interna",
-      details: error.message
-    });
-  }
+  res.status(200).json({
+    risco: score,
+    classificacao
+  });
 }
