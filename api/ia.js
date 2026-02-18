@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/facebook/bart-large-mnli",
+      "https://api-inference.huggingface.co/models/facebook/bart-large-mnli?wait_for_model=true",
       {
         method: "POST",
         headers: {
@@ -27,34 +27,45 @@ export default async function handler(req, res) {
               "engenharia social",
               "pedido urgente suspeito",
               "mensagem legítima"
-            ],
-          },
+            ]
+          }
         }),
       }
     );
 
     const data = await response.json();
 
-    if (!data.scores) {
-      return res.status(500).json({ error: "Erro na IA", raw: data });
+    // Se o modelo estiver carregando
+    if (data.error) {
+      return res.status(500).json({
+        error: "Modelo carregando ou token inválido",
+        detalhes: data.error
+      });
+    }
+
+    if (!data.scores || !data.labels) {
+      return res.status(500).json({
+        error: "Resposta inesperada da IA",
+        raw: data
+      });
     }
 
     const resultados = data.labels.map((label, index) => ({
       label,
-      score: Math.round(data.scores[index] * 100),
+      score: Math.round(data.scores[index] * 100)
     }));
 
-    const risco = Math.max(...resultados.map((r) => r.score));
+    const risco = Math.max(...resultados.map(r => r.score));
 
     return res.status(200).json({
       risco,
-      resultados,
+      resultados
     });
 
   } catch (error) {
     return res.status(500).json({
       error: "Falha interna",
-      details: error.message,
+      details: error.message
     });
   }
 }
