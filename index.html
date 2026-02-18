@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Protocolo G.S.O.</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
 *{margin:0;padding:0;box-sizing:border-box;}
 body{
 font-family:'Inter',sans-serif;
 background:#0b0f18;
 color:#eaeefb;
 min-height:100vh;
-overflow-x:hidden;
 }
 
 header{
@@ -32,94 +32,134 @@ background:linear-gradient(90deg,#00f5a0,#00d9f5);
 color:transparent;
 }
 
-.subtitle{opacity:0.5;margin-top:8px;font-size:14px;}
+.subtitle{opacity:0.6;margin-top:8px;}
 .author{margin-top:6px;font-size:13px;opacity:0.4;}
 
 .container{
-max-width:900px;
+max-width:1000px;
 margin:auto;
 padding:40px;
-border-radius:20px;
 background:rgba(255,255,255,0.04);
-border:1px solid rgba(0,217,245,0.15);
+border-radius:20px;
+border:1px solid rgba(0,217,245,0.2);
 backdrop-filter:blur(25px);
-box-shadow:0 0 50px rgba(0,0,0,0.6);
 }
 
 textarea{
 width:100%;
-height:170px;
+height:150px;
 background:rgba(255,255,255,0.05);
-border:1px solid rgba(0,217,245,0.25);
-border-radius:14px;
+border:1px solid rgba(0,217,245,0.3);
+border-radius:12px;
 padding:20px;
 color:white;
-font-size:15px;
 resize:none;
 outline:none;
-transition:0.3s;
 }
 
 textarea:focus{
-box-shadow:0 0 20px rgba(0,217,245,0.6);
-background:rgba(255,255,255,0.08);
+box-shadow:0 0 20px rgba(0,217,245,0.5);
 }
 
 button{
-margin-top:25px;
-padding:15px 50px;
+margin-top:20px;
+padding:14px 40px;
 border:none;
 border-radius:12px;
-font-weight:700;
 background:linear-gradient(90deg,#00f5a0,#00d9f5);
-color:black;
+font-weight:700;
 cursor:pointer;
-transition:0.3s;
 }
-
-button:hover{transform:scale(1.05);}
 
 .result{
 margin-top:40px;
 display:none;
-animation:fadeIn 0.6s ease;
+animation:fade 0.6s ease;
 }
 
-@keyframes fadeIn{
-from{opacity:0;transform:translateY(10px)}
-to{opacity:1;transform:translateY(0)}
+@keyframes fade{
+from{opacity:0;transform:translateY(15px);}
+to{opacity:1;}
 }
 
-.circle{
-width:200px;
-height:200px;
-border-radius:50%;
-margin:20px auto;
+/* SCORE HEADER */
+
+.score-box{
 display:flex;
 align-items:center;
-justify-content:center;
-font-size:28px;
+justify-content:space-between;
+flex-wrap:wrap;
+gap:20px;
+margin-bottom:30px;
+}
+
+.score-value{
+font-size:64px;
+font-weight:800;
+}
+
+.score-label{
+font-size:22px;
+font-weight:600;
+}
+
+.progress{
+width:100%;
+height:14px;
+background:rgba(255,255,255,0.1);
+border-radius:10px;
+overflow:hidden;
+}
+
+.progress-fill{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#00f5a0,#00d9f5);
+transition:1s ease;
+}
+
+/* CARDS */
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+margin-top:25px;
+}
+
+.card{
+background:rgba(255,255,255,0.05);
+padding:18px;
+border-radius:12px;
+border:1px solid rgba(255,255,255,0.1);
+}
+
+.card-title{
+font-size:13px;
+opacity:0.6;
+margin-bottom:8px;
+}
+
+.card-value{
+font-size:22px;
 font-weight:700;
-background:conic-gradient(#00d9f5 0deg, rgba(255,255,255,0.08) 0deg);
-transition:1.5s ease;
 }
 
 .recommendation{
-margin-top:25px;
-padding:18px;
+margin-top:30px;
+padding:20px;
 border-radius:14px;
 background:rgba(0,217,245,0.08);
 border:1px solid rgba(0,217,245,0.3);
-font-size:14px;
-line-height:1.5;
 }
 
 footer{
 text-align:center;
-margin:80px 0 30px;
+margin:70px 0 30px;
 opacity:0.4;
 font-size:13px;
 }
+
 </style>
 </head>
 
@@ -132,13 +172,47 @@ font-size:13px;
 </header>
 
 <div class="container">
-<textarea id="texto" placeholder="Cole aqui o texto para análise cognitiva estruturada..."></textarea>
+
+<textarea id="texto" placeholder="Cole o texto para análise..."></textarea>
 <button onclick="analisar()">INICIAR ANÁLISE</button>
 
 <div class="result" id="resultado">
-<div class="circle" id="circle">0%</div>
-<canvas id="grafico"></canvas>
+
+<div class="score-box">
+<div>
+<div class="score-value" id="score">0%</div>
+<div class="score-label" id="classificacao">Classificação</div>
+</div>
+</div>
+
+<div class="progress">
+<div class="progress-fill" id="barra"></div>
+</div>
+
+<div class="cards">
+<div class="card">
+<div class="card-title">Urgência</div>
+<div class="card-value" id="urgenciaV">0%</div>
+</div>
+
+<div class="card">
+<div class="card-title">Financeiro</div>
+<div class="card-value" id="financeiroV">0%</div>
+</div>
+
+<div class="card">
+<div class="card-title">Ameaça</div>
+<div class="card-value" id="ameacaV">0%</div>
+</div>
+
+<div class="card">
+<div class="card-title">Imperativo</div>
+<div class="card-value" id="imperativoV">0%</div>
+</div>
+</div>
+
 <div class="recommendation" id="recomendacao"></div>
+
 </div>
 </div>
 
@@ -148,83 +222,47 @@ Protocolo G.S.O. — Defesa Cognitiva Digital Global
 
 <script>
 
-let chartInstance=null;
-
 function analisar(){
+
 let texto=document.getElementById("texto").value;
-if(texto.length<20){alert("Insira um texto mais completo.");return;}
+if(texto.length<20){alert("Texto muito curto.");return;}
 
 let lower=texto.toLowerCase();
 let palavras=lower.split(/\s+/).filter(p=>p.length>2);
 let total=palavras.length;
 
-function densidade(regex){
-return ((lower.match(regex)||[]).length)/total;
-}
+function densidade(r){return ((lower.match(r)||[]).length)/total;}
 
-let urgencia=densidade(/agora|urgente|imediato|hoje|última chance|rápido/g);
-let financeiro=densidade(/pix|dinheiro|pagamento|taxa|transferência|cartão/g);
-let ameaca=densidade(/bloqueado|cancelado|processo|problema|penalidade/g);
-let emocional=densidade(/desespero|socorro|ajuda|grave|perigo/g);
-let imperativo=densidade(/clique|acesse|envie|faça|responda|pague/g);
+let urgencia=densidade(/agora|urgente|imediato|hoje|rápido/g)*100;
+let financeiro=densidade(/pix|dinheiro|pagamento|transferência|fornecedor/g)*100;
+let ameaca=densidade(/bloqueado|cancelado|problema/g)*100;
+let imperativo=densidade(/me faz|pode|envie|faça|responda/g)*100;
 
-let repeticao=(new Set(palavras).size/total);
-let exclamacoes=(texto.match(/!/g)||[]).length/5;
-let caixaAlta=(texto.match(/[A-Z]{4,}/g)||[]).length/3;
-
-let risco=
-(urgencia*120)+
-(financeiro*150)+
-(ameaca*130)+
-(emocional*100)+
-(imperativo*120)+
-((1-repeticao)*60)+
-(exclamacoes*20)+
-(caixaAlta*30);
+let risco=(urgencia*1.5)+(financeiro*1.8)+(ameaca*1.4)+(imperativo*1.3);
 
 risco=Math.min(Math.round(risco),100);
 
 document.getElementById("resultado").style.display="block";
 
-let graus=risco*3.6;
-document.getElementById("circle").style.background=
-`conic-gradient(#00d9f5 ${graus}deg, rgba(255,255,255,0.08) ${graus}deg)`;
-document.getElementById("circle").innerHTML=risco+"%";
+document.getElementById("score").innerHTML=risco+"%";
+document.getElementById("barra").style.width=risco+"%";
 
-if(chartInstance){chartInstance.destroy();}
+document.getElementById("urgenciaV").innerHTML=Math.round(urgencia)+"%";
+document.getElementById("financeiroV").innerHTML=Math.round(financeiro)+"%";
+document.getElementById("ameacaV").innerHTML=Math.round(ameaca)+"%";
+document.getElementById("imperativoV").innerHTML=Math.round(imperativo)+"%";
 
-chartInstance=new Chart(document.getElementById("grafico"),{
-type:'radar',
-data:{
-labels:["Urgência","Financeiro","Ameaça","Emocional","Imperativo"],
-datasets:[{
-data:[
-Math.round(urgencia*100),
-Math.round(financeiro*100),
-Math.round(ameaca*100),
-Math.round(emocional*100),
-Math.round(imperativo*100)
-],
-borderColor:"#00d9f5",
-backgroundColor:"rgba(0,217,245,0.2)"
-}]
-}
-});
+let classe="BAIXO RISCO";
+if(risco>70){classe="ALTO RISCO";}
+else if(risco>40){classe="RISCO MODERADO";}
 
-let textoRec="";
+document.getElementById("classificacao").innerHTML=classe;
 
-if(risco>75){
-textoRec="ALTO RISCO estrutural identificado. Forte padrão de manipulação e pressão.";
-}
-else if(risco>45){
-textoRec="Risco moderado detectado. Avalie cuidadosamente antes de agir.";
-}
-else{
-textoRec="Baixo risco estrutural identificado. Texto aparentemente informativo.";
+document.getElementById("recomendacao").innerHTML=
+"Análise estrutural baseada em padrões linguísticos. Para detectar golpes narrativos sofisticados, recomenda-se integrar modelo semântico de IA.";
+
 }
 
-document.getElementById("recomendacao").innerHTML=textoRec;
-}
 </script>
 
 </body>
